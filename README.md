@@ -1,6 +1,12 @@
 # istrumpdead.io
 
-One static page. It reads Donald Trump's Wikidata record (Q22686) in the visitor's browser and shows **Yes** if it has a date of death (P570), **No** otherwise, then lists organizations to support. Edit the `ORGS` array in `index.html` to change the list.
+One static page, no build step. Everything runs in the visitor's browser:
+
+- **The answer** comes from Wikidata record Q22686: **Yes** if it has a date of death (P570), **No** otherwise.
+- **The question** uses a random nickname from `NICKNAMES` (click it for another). The real name never appears on the page.
+- **Local organizations**: the visitor's state is looked up from their IP via [GeoJS](https://www.geojs.io/), and the page shows that state's ACLU affiliate(s) plus the national ACLU. Visitors outside the US only see the worldwide list (`GLOBAL_ORGS`).
+
+`ACLU_AFFILIATES` was pulled from `https://www.aclu.org/wp-json/wp/v2/affiliate_info?per_page=100` (52 entries: 50 states, DC and Puerto Rico; California has three).
 
 ## Deploy free on GitHub Pages
 
