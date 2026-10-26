@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is Trump Dead?</title>
+<meta name="description" content="A one-word answer, checked live against Wikidata.">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --fg: #16161a;
+    --muted: #6b6b73;
+    --line: #e2e2dc;
+    --card: #ffffff;
+    --accent: #1f4fd1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111114;
+      --fg: #f1f1ee;
+      --muted: #9a9aa3;
+      --line: #2a2a31;
+      --card: #18181d;
+      --accent: #7aa2ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .hero {
+    min-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px;
+  }
+  .question {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: var(--muted);
+    margin: 0 0 8px;
+    font-weight: 500;
+  }
+  .answer {
+    font-size: clamp(7rem, 32vw, 20rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin: 0;
+  }
+  .status {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+  .status a { color: inherit; }
+  .scroll {
+    margin-top: 40px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 16px 64px;
+  }
+  h2 { font-size: 1.4rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  ul.orgs { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .orgs a {
+    display: block;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+  }
+  .orgs a:hover { border-color: var(--accent); }
+  .orgs strong { display: block; color: var(--accent); }
+  .orgs span { color: var(--muted); font-size: 0.95rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 0 16px 32px; }
+</style>
+</head>
+<body>
+  <section class="hero">
+    <p class="question">Is Donald Trump dead?</p>
+    <p class="answer" id="answer">No</p>
+    <p class="status" id="status">Checking&hellip;</p>
+    <a class="scroll" href="#support">Do something useful &darr;</a>
+  </section>
+
+  <main id="support">
+    <h2>Support these organizations</h2>
+    <p class="sub">Put the energy somewhere it counts.</p>
+    <ul class="orgs" id="orgs"></ul>
+  </main>
+
+  <footer>Status read from <a href="https://www.wikidata.org/wiki/Q22686" style="color:inherit">Wikidata</a>. Not affiliated with any organization listed.</footer>
+
+<script>
+  // Edit this list to change the organizations shown.
+  const ORGS = [
+    { name: "ACLU", url: "https://www.aclu.org/", blurb: "Defends civil rights and liberties in court." },
+    { name: "Democracy Forward", url: "https://democracyforward.org/", blurb: "Litigates against executive overreach." },
+    { name: "Protect Democracy", url: "https://protectdemocracy.org/", blurb: "Works to prevent authoritarian drift." },
+    { name: "Brennan Center for Justice", url: "https://www.brennancenter.org/", blurb: "Voting rights and rule-of-law research." },
+    { name: "Southern Poverty Law Center", url: "https://www.splcenter.org/", blurb: "Fights hate and extremism." },
+    { name: "Planned Parenthood", url: "https://www.plannedparenthood.org/", blurb: "Reproductive health care and advocacy." },
+    { name: "RAICES", url: "https://www.raicestexas.org/", blurb: "Legal services for immigrants and refugees." },
+  ];
+
+  const list = document.getElementById("orgs");
+  for (const o of ORGS) {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = o.url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.innerHTML = "<strong></strong><span></span>";
+    a.querySelector("strong").textContent = o.name;
+    a.querySelector("span").textContent = o.blurb;
+    li.appendChild(a);
+    list.appendChild(li);
+  }
+
+  // Q22686 is Donald Trump on Wikidata; P570 is "date of death".
+  const answer = document.getElementById("answer");
+  const status = document.getElementById("status");
+  const ENTITY = "https://www.wikidata.org/wiki/Special:EntityData/Q22686.json";
+
+  fetch(ENTITY, { cache: "no-store" })
+    .then(r => r.json())
+    .then(data => {
+      const claims = (data.entities.Q22686.claims.P570 || [])
+        .filter(c => c.rank !== "deprecated" && c.mainsnak.snaktype === "value");
+      const checked = new Date().toLocaleString();
+      if (claims.length) {
+        const t = claims[0].mainsnak.datavalue.value.time; // e.g. "+2030-01-01T00:00:00Z"
+        const date = new Date(t.replace(/^\+/, "")).toLocaleDateString(undefined, { dateStyle: "long" });
+        answer.textContent = "Yes";
+        status.textContent = "Date of death on Wikidata: " + date + ". Checked " + checked + ".";
+      } else {
+        answer.textContent = "No";
+        status.textContent = "No date of death on Wikidata. Checked " + checked + ".";
+      }
+    })
+    .catch(() => {
+      status.textContent = "Couldn't reach Wikidata, so this is the last known answer.";
+    });
+</script>
+</body>
+</html>
