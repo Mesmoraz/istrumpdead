@@ -72,6 +72,8 @@
     cursor: pointer;
   }
   .shuffle:hover { color: var(--fg); border-color: var(--accent); }
+  /* The answer's glyphs overflow its 1.0 line-height upward; keep the controls above it for clicks. */
+  .question, .shuffle { position: relative; z-index: 1; }
   .answer {
     font-size: clamp(7rem, 32vw, 20rem);
     font-weight: 900;
