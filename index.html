@@ -56,7 +56,22 @@
     cursor: pointer;
     text-decoration: underline dotted;
     text-underline-offset: 4px;
+    transition: opacity 0.2s ease;
   }
+  .question button.out { opacity: 0; }
+  .question button.spinning { color: var(--accent); }
+  .shuffle {
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin: 0 0 12px;
+    cursor: pointer;
+  }
+  .shuffle:hover { color: var(--fg); border-color: var(--accent); }
   .answer {
     font-size: clamp(7rem, 32vw, 20rem);
     font-weight: 900;
@@ -102,7 +117,8 @@
 </head>
 <body>
   <div class="hero">
-    <p class="question">Is <button id="nick" type="button" title="Another name">him</button> dead?</p>
+    <p class="question">Is <button id="nick" type="button" title="Another name" aria-live="polite">him</button> dead?</p>
+    <button class="shuffle" id="shuffle" type="button">&#127922; Another name</button>
     <p class="answer" id="answer">No</p>
     <p class="status" id="status">Checking&hellip;</p>
     <a class="scroll" href="#support">Do something useful &darr;</a>
@@ -128,7 +144,8 @@
   </footer>
 
 <script>
-  // Shown in random order; click the name for another.
+  // Shown in shuffled order, rotating on their own; click the name or the dice for a spin.
+  // A leading "the" stays lowercase so it reads mid-sentence: "Is the Orange Menace dead?"
   const NICKNAMES = [
     "The Donald",
     "the Tangerine Tornado",
@@ -145,17 +162,194 @@
     "Big Mac Daddy",
     "the Short-Fingered Vulgarian",
     "Sir Tweets-a-Lot",
+    // Fruit, food & condiments
+    "Mango Mussolini",
+    "the Tangerine Tyrant",
+    "Cheeto Benito",
+    "Pumpkin Spice Dictator",
+    "Sweet Potato Stalin",
+    "the Apricot Autocrat",
+    "Yammy Mussolini",
+    "Cheddar Caesar",
+    "the Dorito Despot",
+    "Velveeta Voldemort",
+    "Mayonnaise Mussolini",
+    "Spray-Tan Spam",
+    "the Orange Chicken Overlord",
+    "Big Mac Benito",
+    "Meatloaf Mussolini",
+    "the Human Cheese Puff",
+    "the Diet Coke Despot",
+    "the Ketchup Kaiser",
+    "the Great Pumpkin Führer",
+    // Dictators & wannabe emperors
+    "Butterscotch Hitler",
+    "the Fanta Führer",
+    "Cheetolini",
+    "Trumpoleon Bonaparte",
+    "Benito Tangerini",
+    "Adolf Twitler",
+    "Comb-Over Caligula",
+    "Tangerine Nero",
+    "Pumpkin Spice Palpatine",
+    "Temu Mussolini",
+    "the Mar-a-Lago Mad King",
+    "the Dollar-Store Dictator",
+    "Führer McFlurry",
+    "the Discount Despot",
+    "Supreme Leader Spray-Tan",
+    "King Baby the First",
+    // Hair, makeup & appearance
+    "Captain Combover",
+    "the Tanning Bed Warning Label",
+    "the Human Creamsicle",
+    "the Bronzer Bandit",
+    "the Toupee Tyrant",
+    "Spray-Tan Satan",
+    "the Orange Goblin",
+    "the Tangerine Toddler",
+    "Boiled Ham in a Wig",
+    "the Comb-Over Commander",
+    "the Sentient Cheeto",
+    "the Apricot Abomination",
+    "the Golden Corral Gatsby",
+    "the Hair Apparent",
+    "the Sunburnt Sovereign",
+    // Lies, scams & corruption
+    "Don the Con",
+    "the Commander-in-Thief",
+    "the Lyin' King",
+    "Nostra-Dumbass",
+    "the Grifter-in-Chief",
+    "Uncle Scam",
+    "Trumpinocchio",
+    "the Shart of the Deal",
+    "the Swindler of the Free World",
+    "the Bankruptcy Baron",
+    "the Con Artist-in-Chief",
+    "Fraudulent Orange",
+    "the Ponzi Pumpkin",
+    "the Felonious Fanta",
+    "the Crookie Monster",
+    "the Tariff Terrorist",
+    "the Great American Grift",
+    // Crude & gloriously juvenile
+    "Von Shitzenpantz",
+    "Count Flatula",
+    "the Founding Farter",
+    "Diaper Don",
+    "the Incontinental Divider",
+    "Groper Cleveland",
+    "the Bigly Douche",
+    "His Flatulency",
+    "the Orange Shart",
+    "Sir Farts-a-Lot",
+    "the Crotch-Pot Commander",
+    "the Golden Shower Curtain",
+    "the Mar-a-Lago Meatball",
+    "the Great White Dope",
+    // Pop culture & villains
+    "Darth Tan",
+    "the Lord of the Lies",
+    "Sauron of the Sunbed",
+    "the Manchurian Cantaloupe",
+    "the Troompa Loompa",
+    "Humpty Trumpty",
+    "the MAGA-Lorian",
+    "Don Whoreleone",
+    "the Joker Without the Charm",
+    "Gollum with a Gold Toilet",
+    "Wario in a Red Tie",
+    "the Emperor Has No Tan",
+    "Lex Luthor's Discount Cousin",
+    "the Lorax of Lies",
+    // Short & meme-sized
+    "TACO Don",
+    "Don Snoreleone",
+    "Twitler",
+    "Trumplethinskin",
+    "the Orange Menace",
+    "the Tiny-Hands Tyrant",
+    "the Tangerine Terror",
+    "the King of the Whoppers",
+    "Bratman",
+    "the Human Dorito",
+    "IQ-47",
+    "Farty-Seven",
+    // Fresh combinations
+    "Butternut Benito",
+    "Mango Mussolini's Discount Cousin",
+    "Pumpkin Spice Pol Pot",
+    "Caramel-Coated Caligula",
+    "Cheeto-Stained Caesar",
+    "the Tangerine Turd Reich",
+    "Velour Tracksuit Vlad",
+    "Apricot Mussolini",
+    "the Spray-Tan Strongman",
+    "the Mar-a-Lago Man-Baby",
+    "Diet Fascism with Extra Cheese",
+    "the Orange Oligarch",
+    "the Tangerine Tyrannosaurus",
+    "the Botoxed Banana Republic",
+    "the Great Pumpkin Grifter",
+    "Lord Dampnut",
+    "the Beige-Flag Benito",
+    "the Comb-Over Kleptocrat",
+    "the Big Mac Autocrat",
+    "Mango Mussolini: The Temu Edition",
   ];
   const nick = document.getElementById("nick");
-  let lastNick = -1;
-  function newNick() {
-    let i;
-    do { i = Math.floor(Math.random() * NICKNAMES.length); } while (i === lastNick);
-    lastNick = i;
-    nick.textContent = NICKNAMES[i];
+  const shuffleBtn = document.getElementById("shuffle");
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Deal from a shuffled deck so every name shows before any repeats.
+  let deck = [];
+  function nextName() {
+    if (!deck.length) {
+      deck = NICKNAMES.slice();
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      if (deck[deck.length - 1] === nick.textContent) deck.unshift(deck.pop());
+    }
+    return deck.pop();
   }
-  nick.addEventListener("click", newNick);
-  newNick();
+
+  function showName(name, animate) {
+    if (!animate || calm) { nick.textContent = name; return; }
+    nick.classList.add("out");
+    setTimeout(() => { nick.textContent = name; nick.classList.remove("out"); }, 200);
+  }
+
+  // Slot-machine spin: flick through names fast, slowing down before landing.
+  let spinning = false;
+  function spin() {
+    if (spinning) return;
+    if (calm) { showName(nextName(), false); restartRotation(); return; }
+    spinning = true;
+    nick.classList.add("spinning");
+    let delay = 45;
+    (function tick() {
+      nick.textContent = nextName();
+      delay *= 1.18;
+      if (delay < 300) { setTimeout(tick, delay); return; }
+      nick.classList.remove("spinning");
+      spinning = false;
+      restartRotation();
+    })();
+  }
+
+  let rotation;
+  function restartRotation() {
+    clearInterval(rotation);
+    if (!calm) rotation = setInterval(() => { if (!spinning && !document.hidden) showName(nextName(), true); }, 3500);
+  }
+
+  nick.addEventListener("click", spin);
+  shuffleBtn.addEventListener("click", spin);
+  showName(nextName(), false);
+  restartRotation();
 
   const GLOBAL_ORGS = [
     { name: "Amnesty International", url: "https://www.amnesty.org/", blurb: "Investigates and campaigns against human rights abuses worldwide." },
